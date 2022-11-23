@@ -1,16 +1,86 @@
-const Express = require('express')
-const Http = require('http').Server(Express);
-let Socketio = require('socket.io')(Http ,{
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
-        transports:['websocket', 'polling']
-      }});
+let app = require('express')();
+let server = require('http').createServer(app);
 
-Http.listen(3000, () => {
-    console.log("Listening at :3000...");
+let io = require('socket.io')(server,{
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"],
+      transports: ['websocket', 'polling']
+    }
+  });
+
+let position = {
+    servoLeft: 0,
+    servoRight: 0,
+    motor:0
+}
+
+io.on('connection', (socket) => {
+ 
+  socket.on('disconnect', function(){
+    io.emit('users-changed', {user: socket.username, event: 'left'});  
+  });
+  
+  socket.on('set-name', (name) => {
+    socket.username = name;
+    io.emit('users-changed', {user: name, event: 'joined'});    
+  });
+  
+  socket.on('send-message', (message) => {
+    io.emit('message', {msg: message.text, user: socket.username, createdAt: new Date()});    
+  });
+
+  socket.on('speed', data => {
+    position.motor = data.number;
+    io.emit("position",position);
+    console.log(position);
+  })
+
+  
+  socket.on('flaps', data => {
+    switch(data) {
+        case "left":
+            position.servoLeft = 0;
+            position.servoRight = 180;
+            socket.emit("position", position);
+            console.log(position);
+            break;
+        case "right":
+            position.servoLeft = 180;
+            position.servoRight = 0;
+            socket.emit("position", position);
+            console.log(position);
+            break;
+        case "up":
+            position.servoLeft = 0;
+            position.servoRight = 180;
+            socket.emit("position", position);
+            console.log(position);
+            break;
+        case "down":
+            position.servoLeft = 180;
+            position.servoRight = 0;
+            socket.emit("position", position);
+            console.log(position);
+            break;
+        case "center":
+          position.servoLeft =110;
+          position.servoRight =70;
+          socket.emit("position", position);
+          console.log(position);
+          break;
+    }
 });
 
+});
+var port = process.env.PORT || 3001
+server.listen(port, function(){
+   console.log('listening in http://localhost:' + port);
+});
+
+
+
+/*
 var position = {
     x: 200,
     y: 200
@@ -39,4 +109,4 @@ Socketio.on("connection", socket => {
         }
     });
 });
-
+*/
