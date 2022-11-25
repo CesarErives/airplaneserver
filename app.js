@@ -34,7 +34,7 @@ io.on('connection', (socket) => {
     position.motor = data.number;
     io.emit("position",position);
     console.log(position);
-  })
+  });
 
   
   socket.on('flaps', data => {
@@ -42,34 +42,30 @@ io.on('connection', (socket) => {
         case "left":
             position.servoLeft = 0;
             position.servoRight = 180;
-            socket.emit("position", position);
             console.log(position);
             break;
         case "right":
             position.servoLeft = 180;
             position.servoRight = 0;
-            socket.emit("position", position);
             console.log(position);
             break;
         case "up":
             position.servoLeft = 0;
             position.servoRight = 180;
-            socket.emit("position", position);
             console.log(position);
             break;
         case "down":
             position.servoLeft = 180;
             position.servoRight = 0;
-            socket.emit("position", position);
             console.log(position);
             break;
         case "center":
           position.servoLeft =110;
           position.servoRight =70;
-          socket.emit("position", position);
           console.log(position);
           break;
     }
+socket.emit("position", position);
 });
 
 });
